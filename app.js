@@ -43,6 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
                 break;
+            case 'StringLiteral':
+                treeData.name = `String Literal ("${node.value}")`;
+                break;
+            case 'CharLiteral':
+                treeData.name = `Char Literal ('${node.value}')`;
+                break;
+            case 'GetInput':
+                treeData.name = 'GetInput';
+                treeData.children.push(convertASTToTreeData(node.prompt));
+                break;
             default:
                 treeData.name = `Unknown (${node.type})`;
         }
@@ -199,6 +209,59 @@ document.addEventListener('DOMContentLoaded', () => {
             .call(zoom.transform, initialTransform());
     }
 
+    async function handleInput(prompt) {
+        // Create input dialog
+        const inputDialog = document.createElement('div');
+        inputDialog.className = 'input-dialog';
+        inputDialog.innerHTML = `
+            <div class="input-content">
+                <p>${prompt}</p>
+                <input type="text" id="userInput">
+                <button id="submitInput">Submit</button>
+            </div>
+        `;
+        document.body.appendChild(inputDialog);
+
+        // Focus the input field
+        const inputField = inputDialog.querySelector('#userInput');
+        inputField.focus();
+
+        // Return promise that resolves with user input
+        return new Promise((resolve) => {
+            inputDialog.querySelector('#submitInput').addEventListener('click', async () => {
+                const input = inputField.value;
+                document.body.removeChild(inputDialog);
+                
+                // Send input to server
+                const response = await fetch('/input', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ input })
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    output.textContent = `Error: ${data.error}`;
+                    output.className = 'error';
+                } else {
+                    output.textContent = data.output || 'Input processed successfully.';
+                    output.className = 'success';
+                }
+                
+                resolve(input);
+            });
+
+            // Also handle Enter key
+            inputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    inputDialog.querySelector('#submitInput').click();
+                }
+            });
+        });
+    }
+
     runBtn.addEventListener('click', async () => {
         try {
             output.textContent = 'Running code...';
@@ -217,6 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.error) {
                 output.textContent = `Error: ${data.error}`;
                 output.className = 'error';
+            } else if (data.status === 'input_required') {
+                output.textContent = data.prompt;
+                output.className = 'info';
+                await handleInput(data.prompt);
             } else {
                 output.textContent = data.output || 'Code executed successfully.';
                 output.className = 'success';
