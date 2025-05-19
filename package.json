@@ -1,0 +1,14 @@
+{
+  "name": "mini-programming-language",
+  "version": "1.0.0",
+  "description": "A simple mini programming language implementation",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0",
+    "readline-sync": "^1.4.10"
+  }
+}
