@@ -148,7 +148,7 @@ A: Yes! The visual AST and simple syntax make it perfect for classrooms and work
 
 ## 🤝 Contributors & Support
 
-- **Project Maintainer:** [Your Name Here]
+- **Project Maintainer:** Anuj Chib
 - **Contributions:** PRs and suggestions are welcome! Feel free to fork and improve.
 - **Need Help?** Open an issue or start a discussion.
 
